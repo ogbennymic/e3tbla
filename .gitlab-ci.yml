@@ -1,0 +1,54 @@
+# Use the official Docker image as the base for our pipeline jobs.
+# This image includes the Docker daemon, allowing us to build images inside the container.
+image: docker:20.10.16
+
+# This service is required for the Docker-in-Docker setup. It runs the Docker daemon
+# as a separate container that the main job can connect to.
+services:
+  - docker:20.10.16-dind
+
+# A 'before_script' section runs commands before every job.
+before_script:
+  # Log in to the GitLab Container Registry. This is necessary to pull or push images.
+  # The environment variables are provided automatically by GitLab CI/CD.
+  # $CI_REGISTRY is the registry URL (e.g., registry.gitlab.com).
+  # $CI_REGISTRY_USER is a special user for the pipeline.
+  # $CI_REGISTRY_PASSWORD is a temporary password for this user.
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+
+# Define the stages of our pipeline.
+# 'build' will create the Docker image.
+# 'push' will upload the image to the registry.
+stages:
+  - build
+  - push
+
+# The 'build-image' job.
+build-image:
+  stage: build
+  # We only want to run this job when a change is pushed to a branch or a tag is created.
+  # This prevents the job from running on every commit in a merge request.
+  rules:
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+  script:
+    # Build the Docker image using the Dockerfile from the project's root.
+    # The image is tagged with the commit SHA and a tag for the branch or tag name.
+    # $CI_REGISTRY_IMAGE is the path to the project's registry.
+    # $CI_COMMIT_SHA is the full commit hash.
+    # $CI_COMMIT_REF_SLUG is a friendly version of the branch or tag name.
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
+
+# The 'push-image' job.
+push-image:
+  stage: push
+  # We only want to run this job after the 'build' stage completes successfully.
+  # This ensures that we only push the image if it was built without errors.
+  needs:
+    - build-image
+
+  script:
+    # Push the images to the GitLab Container Registry.
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
