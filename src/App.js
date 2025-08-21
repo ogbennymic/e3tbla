@@ -287,14 +287,25 @@ const App = () => {
                       <div className="h-4 bg-gray-200 rounded-md dark:bg-gray-700"></div>
                     </div>
                   ) : daySlots.length > 0 ? (
-                    daySlots.map((slot, i) => (
-                      <div
-                        key={i}
-                        className="bg-blue-500 text-white p-1 rounded-md text-xs truncate"
-                      >
-                        {format(slot.start, 'h:mm a')} - {format(slot.end, 'h:mm a')}
-                      </div>
-                    ))
+                    daySlots.map((slot, i) => {
+                      // Calculate the duration of the slot in milliseconds
+                      const duration = slot.end.getTime() - slot.start.getTime();
+                      const oneDayInMs = 24 * 60 * 60 * 1000;
+
+                      return (
+                        <div
+                          key={i}
+                          className="bg-blue-500 text-white p-1 rounded-md text-xs truncate"
+                        >
+                           {/* Check if the slot duration is exactly one day */}
+                           {duration === oneDayInMs ? (
+                              <span>All Day</span>
+                           ) : (
+                              <span>{format(slot.start, 'h:mm a')} - {format(slot.end, 'h:mm a')}</span>
+                           )}
+                        </div>
+                      );
+                    })
                   ) : (
                     <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No slots</span>
                   )}
