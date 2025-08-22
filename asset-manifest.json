@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/e3tbla/static/css/main.55339ba5.css",
+    "main.js": "/e3tbla/static/js/main.884062af.js",
+    "static/js/453.485cb7ab.chunk.js": "/e3tbla/static/js/453.485cb7ab.chunk.js",
+    "index.html": "/e3tbla/index.html",
+    "main.55339ba5.css.map": "/e3tbla/static/css/main.55339ba5.css.map",
+    "main.884062af.js.map": "/e3tbla/static/js/main.884062af.js.map",
+    "453.485cb7ab.chunk.js.map": "/e3tbla/static/js/453.485cb7ab.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.55339ba5.css",
+    "static/js/main.884062af.js"
+  ]
+}
